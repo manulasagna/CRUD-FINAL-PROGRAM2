@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ventas - Acoustic Zone</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Gestión de Ventas</h1>
+    <div class="form-container">
+        <input type="text" id="productoInput" placeholder="Producto">
+        <input type="number" id="cantidadInput" placeholder="Cantidad">
+        <select id="metodoPagoInput">
+            <option value="">Método de Pago</option>
+            <option value="Efectivo">Efectivo</option>
+            <option value="Débito">Débito</option>
+            <option value="Transferencia">Transferencia</option>
+        </select>
+        <input type="number" id="precioInput" placeholder="Precio">
+        <input type="date" id="fechaInput">
+        <button onclick="addVenta()">Añadir Venta</button>
+    </div>
+    <div class="sales-list" id="salesList">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Método de Pago</th>
+                    <th>Precio</th>
+                    <th>Fecha</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="salesTableBody">
+    
+            </tbody>
+        </table>
+    </div>
+    <script>
+        let ventas = JSON.parse(localStorage.getItem('ventas')) || [];
+        let nextVentaId = localStorage.getItem('nextVentaId') ? parseInt(localStorage.getItem('nextVentaId')) : 1;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderVentas();
+        });
+
+        function addVenta() {
+            const producto = document.getElementById('productoInput').value.trim();
+            const cantidad = document.getElementById('cantidadInput').value.trim();
+            const metodoPago = document.getElementById('metodoPagoInput').value;
+            const precio = document.getElementById('precioInput').value.trim();
+            const fecha = document.getElementById('fechaInput').value;
+
+            if (producto && cantidad && metodoPago && precio && fecha) {
+                ventas.push({
+                    id: nextVentaId++,
+                    producto: producto,
+                    cantidad: cantidad,
+                    metodoPago: metodoPago,
+                    precio: precio,
+                    fecha: fecha
+                });
+                saveToLocalStorage();
+                clearForm();
+                renderVentas();
+            } else {
+                alert('Por favor, rellena todos los campos');
+            }
+        }
+
+        function clearForm() {
+            document.getElementById('productoInput').value = '';
+            document.getElementById('cantidadInput').value = '';
+            document.getElementById('metodoPagoInput').value = '';
+            document.getElementById('precioInput').value = '';
+            document.getElementById('fechaInput').value = '';
+        }
+
+        function renderVentas() {
+            const salesTableBody = document.getElementById('salesTableBody');
+            salesTableBody.innerHTML = '';
+            ventas.forEach(venta => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${venta.id}</td>
+                    <td>${venta.producto}</td>
+                    <td>${venta.cantidad}</td>
+                    <td>${venta.metodoPago}</td>
+                    <td>${venta.precio}</td>
+                    <td>${venta.fecha}</td>
+                    <td>
+                        <button onclick="deleteVenta(${venta.id})">Eliminar</button>
+                    </td>
+                `;
+                salesTableBody.appendChild(row);
+            });
+        }
+
+        function deleteVenta(id) {
+            ventas = ventas.filter(v => v.id !== id);
+            saveToLocalStorage();
+            renderVentas();
+        }
+
+        function saveToLocalStorage() {
+            localStorage.setItem('ventas', JSON.stringify(ventas));
+            localStorage.setItem('nextVentaId', nextVentaId.toString());
+        }
+    </script>
+</body>
+</html>
