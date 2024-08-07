@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Empleados - Acoustic Zone</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Gestión de Empleados</h1>
+    <div class="form-container" id="formContainer">
+        <input type="text" id="nombreInput" placeholder="Nombre">
+        <input type="text" id="apellidoInput" placeholder="Apellido">
+        <input type="text" id="dniInput" placeholder="DNI">
+        <input type="text" id="telefonoInput" placeholder="Número de Teléfono">
+        <input type="email" id="gmailInput" placeholder="Gmail">
+        <input type="date" id="antiguedadInput">
+        <input type="number" id="edadInput" placeholder="Edad">
+        <input type="text" id="puestoInput" placeholder="Puesto">
+        <button onclick="addEmpleado()">Añadir Empleado</button>
+    </div>
+    <div class="employee-list" id="employeeList">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>DNI</th>
+                    <th>Número de Teléfono</th>
+                    <th>Gmail</th>
+                    <th>Antigüedad</th>
+                    <th>Edad</th>
+                    <th>Puesto</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="employeeTableBody">
+            </tbody>
+        </table>
+    </div>
+    <script>
+        let empleados = JSON.parse(localStorage.getItem('empleados')) || [];
+        let nextEmpleadoId = localStorage.getItem('nextEmpleadoId') ? parseInt(localStorage.getItem('nextEmpleadoId')) : 1;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderEmpleados();
+        });
+
+        function addEmpleado() {
+            const nombre = document.getElementById('nombreInput').value.trim();
+            const apellido = document.getElementById('apellidoInput').value.trim();
+            const dni = document.getElementById('dniInput').value.trim();
+            const telefono = document.getElementById('telefonoInput').value.trim();
+            const gmail = document.getElementById('gmailInput').value.trim();
+            const antiguedad = document.getElementById('antiguedadInput').value;
+            const edad = document.getElementById('edadInput').value.trim();
+            const puesto = document.getElementById('puestoInput').value.trim();
+
+            if (nombre && apellido && dni && telefono && gmail && antiguedad && edad && puesto) {
+                empleados.push({
+                    id: nextEmpleadoId++,
+                    nombre: nombre,
+                    apellido: apellido,
+                    dni: dni,
+                    telefono: telefono,
+                    gmail: gmail,
+                    antiguedad: antiguedad,
+                    edad: edad,
+                    puesto: puesto
+                });
+                saveToLocalStorage();
+                clearForm();
+                renderEmpleados();
+            } else {
+                alert('Por favor, rellena todos los campos');
+            }
+        }
+
+        function clearForm() {
+            document.getElementById('nombreInput').value = '';
+            document.getElementById('apellidoInput').value = '';
+            document.getElementById('dniInput').value = '';
+            document.getElementById('telefonoInput').value = '';
+            document.getElementById('gmailInput').value = '';
+            document.getElementById('antiguedadInput').value = '';
+            document.getElementById('edadInput').value = '';
+            document.getElementById('puestoInput').value = '';
+        }
+
+        function renderEmpleados() {
+            const employeeTableBody = document.getElementById('employeeTableBody');
+            employeeTableBody.innerHTML = '';
+            empleados.forEach(empleado => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${empleado.id}</td>
+                    <td><input type="text" value="${empleado.nombre}" onchange="updateEmpleado(${empleado.id}, 'nombre', this.value)"></td>
+                    <td><input type="text" value="${empleado.apellido}" onchange="updateEmpleado(${empleado.id}, 'apellido', this.value)"></td>
+                    <td><input type="text" value="${empleado.dni}" onchange="updateEmpleado(${empleado.id}, 'dni', this.value)"></td>
+                    <td><input type="text" value="${empleado.telefono}" onchange="updateEmpleado(${empleado.id}, 'telefono', this.value)"></td>
+                    <td><input type="email" value="${empleado.gmail}" onchange="updateEmpleado(${empleado.id}, 'gmail', this.value)"></td>
+                    <td><input type="date" value="${empleado.antiguedad}" onchange="updateEmpleado(${empleado.id}, 'antiguedad', this.value)"></td>
+                    <td><input type="number" value="${empleado.edad}" onchange="updateEmpleado(${empleado.id}, 'edad', this.value)"></td>
+                    <td><input type="text" value="${empleado.puesto}" onchange="updateEmpleado(${empleado.id}, 'puesto', this.value)"></td>
+                    <td>
+                        <button onclick="deleteEmpleado(${empleado.id})">Eliminar</button>
+                    </td>
+                `;
+                employeeTableBody.appendChild(row);
+            });
+        }
+
+        function updateEmpleado(id, field, value) {
+            const empleado = empleados.find(e => e.id === id);
+            if (empleado) {
+                empleado[field] = value;
+                saveToLocalStorage();
+                renderEmpleados();
+            }
+        }
+
+        function deleteEmpleado(id) {
+            empleados = empleados.filter(e => e.id !== id);
+            saveToLocalStorage();
+            renderEmpleados();
+        }
+
+        function saveToLocalStorage() {
+            localStorage.setItem('empleados', JSON.stringify(empleados));
+            localStorage.setItem('nextEmpleadoId', nextEmpleadoId.toString());
+        }
+    </script>
+</body>
+</html>
